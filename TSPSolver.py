@@ -82,7 +82,53 @@ class TSPSolver:
 	'''
 
 	def greedy( self,time_allowance=60.0 ):
-		pass
+		results = {}
+		cities = self._scenario.getCities()
+		ncities = len(cities)
+		foundTour = False
+		beginCity = 0
+		count = 0
+		bssf = None
+		start_time = time.time()
+		# Keep searching while a tour is not found, greedy options are not exhausted, and time limit has not been exceeded
+		while not foundTour and count < ncities and time.time()-start_time < time_allowance:
+			route = [cities[beginCity]]
+			# Add a city to the route until all cities have been visited
+			for i in range(ncities-1):
+				minCost = math.inf
+				nextCity = None
+				# Find the route with the cheapest cost to a city that has not been visited yet
+				for j in range(ncities):
+					if cities[j] not in route:
+						costTo = route[i].costTo(cities[j])
+						if costTo < math.inf and costTo < minCost:
+							# Found a path cheaper than any other path found yet
+							minCost = costTo
+							nextCity = cities[j]
+				if nextCity is not None:
+					route.append(nextCity)
+				else:
+					# No available city, try another tour
+					break
+				pass
+			# Completed a greedy trial
+			beginCity += 1
+			count += 1
+			if len(route) == ncities:
+				# Every city was visited, possible valid tour
+				bssf = TSPSolution(route)
+				if bssf.cost < np.inf:
+					# Found a valid route
+					foundTour = True
+		end_time = time.time()
+		results['cost'] = bssf.cost if foundTour else math.inf
+		results['time'] = end_time - start_time
+		results['count'] = count
+		results['soln'] = bssf
+		results['max'] = None
+		results['total'] = None
+		results['pruned'] = None
+		return results
 	
 	
 	
