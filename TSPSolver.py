@@ -88,10 +88,12 @@ class TSPSolver:
 		foundTour = False
 		beginCity = 0
 		count = 0
-		bssf = None
+		bssf = TSPSolution(cities)
+		bssf.cost = math.inf
 		start_time = time.time()
 		# Keep searching while a tour is not found, greedy options are not exhausted, and time limit has not been exceeded
-		while not foundTour and count < ncities and time.time()-start_time < time_allowance:
+		while beginCity < ncities and time.time()-start_time < time_allowance:
+			# print("Starting city: " + str(beginCity))
 			route = [cities[beginCity]]
 			# Add a city to the route until all cities have been visited
 			for i in range(ncities-1):
@@ -111,15 +113,16 @@ class TSPSolver:
 					# No available city, try another tour
 					break
 				pass
-			# Completed a greedy trial
-			beginCity += 1
-			count += 1
 			if len(route) == ncities:
 				# Every city was visited, possible valid tour
-				bssf = TSPSolution(route)
-				if bssf.cost < np.inf:
-					# Found a valid route
+				pvt = TSPSolution(route)
+				count += 1	
+				if pvt.cost < bssf.cost:
+					# Found a valid route better than previous solutions
 					foundTour = True
+					bssf = pvt
+			# Check next city for a greedy trial
+			beginCity += 1
 		end_time = time.time()
 		results['cost'] = bssf.cost if foundTour else math.inf
 		results['time'] = end_time - start_time
