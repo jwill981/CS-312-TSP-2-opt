@@ -184,3 +184,6 @@ class TSPSolver:
             return None
         else:
             return bs
+
+    def genSplitVals(self, tourLen, numSplits):
+        return [[]]
