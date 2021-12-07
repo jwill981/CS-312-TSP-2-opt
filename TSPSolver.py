@@ -92,6 +92,7 @@ class TSPSolver:
 		bssf.cost = math.inf
 		start_time = time.time()
 		# Keep searching while a tour is not found, greedy options are not exhausted, and time limit has not been exceeded
+		# Time and Space Complexity: O(n^3)
 		while beginCity < ncities and time.time()-start_time < time_allowance:
 			# print("Starting city: " + str(beginCity))
 			route = [cities[beginCity]]
