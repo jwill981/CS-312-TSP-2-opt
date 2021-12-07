@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import copy
 
 from which_pyqt import PYQT_VER
 if PYQT_VER == 'PYQT5':
@@ -16,6 +17,7 @@ import numpy as np
 from TSPClasses import *
 import heapq
 import itertools
+import copy
 
 
 def k_opt_swap(tsp, splits):
