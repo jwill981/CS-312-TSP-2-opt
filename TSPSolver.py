@@ -15,38 +15,6 @@ import itertools
 import copy
 
 
-def k_opt_swap(tsp, splits):
-    k = len(splits)
-    perm = [x for x in itertools.product([True, False], repeat=k + 1)]
-    pieces = []
-    cities = tsp.route
-    bs = TSPSolution(copy.deepcopy(cities))
-    for i in range(k + 1):
-        if i == 0:
-            b = splits[i]
-            pieces.append(cities[:b])
-        elif i == k:
-            a = splits[i - 1]
-            pieces.append(cities[a:])
-        else:
-            a = splits[i - 1]
-            b = splits[i]
-            pieces.append(cities[a:b])
-    for i in range(len(perm)):
-        soln = copy.deepcopy(pieces)
-        for j in range(len(perm[i])):
-            if perm[i][j]:
-                soln[j].reverse()
-        soln = [x for y in soln for x in y]
-        tsp = TSPSolution(soln)
-        if tsp.cost < bs.cost:
-            bs = tsp
-    if bs == cities:
-        return None
-    else:
-        return bs
-
-
 class TSPSolver:
     def __init__(self, gui_view):
         self._scenario = None
@@ -183,3 +151,36 @@ class TSPSolver:
 
     def fancy(self, time_allowance=60.0):
         pass
+
+
+
+    def k_opt_swap(self, tsp, splits):
+        k = len(splits)
+        perm = [x for x in itertools.product([True, False], repeat=k + 1)]
+        pieces = []
+        cities = tsp.route
+        bs = TSPSolution(copy.deepcopy(cities))
+        for i in range(k + 1):
+            if i == 0:
+                b = splits[i]
+                pieces.append(cities[:b])
+            elif i == k:
+                a = splits[i - 1]
+                pieces.append(cities[a:])
+            else:
+                a = splits[i - 1]
+                b = splits[i]
+                pieces.append(cities[a:b])
+        for i in range(len(perm)):
+            soln = copy.deepcopy(pieces)
+            for j in range(len(perm[i])):
+                if perm[i][j]:
+                    soln[j].reverse()
+            soln = [x for y in soln for x in y]
+            tsp = TSPSolution(soln)
+            if tsp.cost < bs.cost:
+                bs = tsp
+        if bs == cities:
+            return None
+        else:
+            return bs
