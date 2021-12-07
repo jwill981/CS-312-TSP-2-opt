@@ -1,33 +1,25 @@
 #!/usr/bin/python3
-import copy
 
 from which_pyqt import PYQT_VER
 if PYQT_VER == 'PYQT5':
 	from PyQt5.QtCore import QLineF, QPointF
 elif PYQT_VER == 'PYQT4':
-	from PyQt4.QtCore import QLineF, QPointF
+	pass
 else:
 	raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
 
-
-
-
-import time
 import numpy as np
 from TSPClasses import *
-import heapq
 import itertools
 import copy
 
 
 def k_opt_swap(tsp, splits):
-
 	k = len(splits)
 	perm = [x for x in itertools.product([True, False], repeat=k + 1)]
 	pieces = []
 	cities = tsp.route
 	bs = TSPSolution(copy.deepcopy(cities))
-
 	for i in range(k + 1):
 		if i == 0:
 			b = splits[i]
@@ -39,7 +31,6 @@ def k_opt_swap(tsp, splits):
 			a = splits[i - 1]
 			b = splits[i]
 			pieces.append(cities[a:b])
-
 	for i in range(len(perm)):
 		soln = copy.deepcopy(pieces)
 		for j in range(len(perm[i])):
@@ -49,7 +40,6 @@ def k_opt_swap(tsp, splits):
 		tsp = TSPSolution(soln)
 		if tsp.cost < bs.cost:
 			bs = tsp
-
 	if bs == cities:
 		return None
 	else:
