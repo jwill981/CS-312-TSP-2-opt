@@ -154,11 +154,11 @@ class TSPSolver:
         cities = self._scenario.getCities()
         results = {}
         bssf = self.greedy()['solution']
-        splits = self.genSplitVals(len(cities), 3)
-        for split in splits:
-            new_route = self.k_opt_swap(bssf, split)
-            if new_route.cost < bssf.cost:
-                bssf = new_route
+        while time.time()-start_time < time_allowance:
+            bssf = self.k_opt(2, len(cities), bssf)
+            bssf = self.k_opt(3, len(cities), bssf)
+            bssf = self.k_opt(4, len(cities), bssf)
+            bssf = self.k_opt(5, len(cities), bssf)
         end_time = time.time()
         results['cost'] = bssf.cost
         results['time'] = end_time - start_time
@@ -168,6 +168,14 @@ class TSPSolver:
         results['total'] = np.inf
         results['pruned'] = np.inf
         return results
+
+    def k_opt(self, k, ncities, bssf):
+        splits = self.genSplitVals(ncities, k)
+        for split in splits:
+            new_route = self.k_opt_swap(bssf, split)
+            if new_route.cost < bssf.cost:
+                bssf = new_route
+        return bssf
 
     def k_opt_swap(self, tsp, splits):
         k = len(splits)
