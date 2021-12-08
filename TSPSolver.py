@@ -244,14 +244,14 @@ class TSPSolver:
 
     def fancy(self, time_allowance=60.0):
         start_time = time.time()
+        finish_time = start_time + time_allowance
         cities = self._scenario.getCities()
         results = {}
         bssf = self.greedy()['soln']
+        k = 2
         while time.time()-start_time < time_allowance:
-            bssf = self.k_opt(2, len(cities), bssf)
-            bssf = self.k_opt(3, len(cities), bssf)
-            bssf = self.k_opt(4, len(cities), bssf)
-            bssf = self.k_opt(5, len(cities), bssf)
+            bssf = self.k_opt(k, len(cities), bssf, finish_time)
+            k += 1
         end_time = time.time()
         results['cost'] = bssf.cost
         results['time'] = end_time - start_time
@@ -262,12 +262,20 @@ class TSPSolver:
         results['pruned'] = np.inf
         return results
 
-    def k_opt(self, k, ncities, bssf):
-        splits = self.genSplitVals(ncities, k)
-        for split in splits:
-            new_route = self.k_opt_swap(bssf, split)
-            if new_route.cost < bssf.cost:
-                bssf = new_route
+    def k_opt(self, k, ncities, bssf, final_time):
+        new_found = True
+        while new_found:
+            new_found = False
+            splits = self.genSplitVals(ncities, k)
+            print('In ' + str(k) + 'opt at ' + str(60 - (final_time - time.time())))
+            for split in splits:
+                if (time.time() > final_time):
+                    break
+                new_route = self.k_opt_swap(bssf, split)
+                if new_route.cost < bssf.cost:
+                    bssf = new_route
+                    new_found = True
+                    break
         return bssf
 
     def k_opt_swap(self, tsp, splits):
