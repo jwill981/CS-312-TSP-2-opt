@@ -13,6 +13,8 @@ import numpy as np
 from TSPClasses import *
 import itertools
 import copy
+from PriorityQueue import PriorityQueue as pq
+from ProblemNode import ProblemNode as pn
 
 
 class TSPSolver:
@@ -138,7 +140,98 @@ class TSPSolver:
 	'''
 
     def branchAndBound(self, time_allowance=60.0):
-        pass
+        results = {}
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        foundTour = False
+        count = 0
+        maxQueueSize = 0
+        totalStates = 0
+        prunedStates = 0
+        # Initialize queue and detirmine inital problem node
+        queue = pq()
+        parentNode = pn.parentNode(self._scenario)
+        parentPriority = self.calcPriority(parentNode, time.time(), time_allowance)
+        queue.push(parentNode, parentPriority)
+        # Time limit for calculating initial BSSF
+        initialTime = 5
+        initialResults = self.greedy(initialTime)
+        # If no results from greedy tour, try finding a random tour
+        if initialResults['cost'] == math.inf:
+            initialResults = self.defaultRandomTour(initialTime)
+            # If no results from random tours, set BSSF to infinity
+            if initialResults['cost'] == math.inf:
+                bssf = TSPSolution([])
+                bssf.cost = math.inf
+            else:
+                bssf = initialResults['soln']
+        else:
+            bssf = initialResults['soln']
+        start_time = time.time()
+        # Branch and Bound algorithm
+        while not queue.isEmpty() and time.time()-start_time < time_allowance:
+            # Get problem at the top of the priority queue
+            problem = queue.pop()
+            if problem.getBound() < bssf.cost:
+                # Expand state to children states
+                for cityIndex in range(ncities):
+                    # Create state only if a route exists to the city being consider
+                    if problem.getCostMatrix()[problem.getTour()[-1]][cityIndex] < math.inf:
+                        totalStates += 1
+                        childNode = pn.fromParent(problem, cityIndex)
+                        solCheck = self.checkSolution(childNode, ncities)
+                        # Check if the state is a solution
+                        if solCheck:
+                            count += 1
+                            if solCheck.cost < bssf.cost:
+                                bssf = solCheck
+                                foundTour = True
+                        elif childNode.getBound() < bssf.cost:
+                            # If it is not a solution and the bound is not greater than the BSSF, put the state in the queue
+                            childPriority = self.calcPriority(childNode, start_time, time_allowance)
+                            queue.push(childNode, childPriority)
+                        else:
+                            prunedStates += 1
+                # Keep track of the max queue size
+                currSize = len(queue.heap)
+                if currSize > maxQueueSize:
+                    maxQueueSize = currSize
+            else:
+                # Prune tree if bound is higher than the BSSF
+                prunedStates +=1
+        end_time = time.time()
+        currSize = len(queue.heap)
+        if currSize > 0:
+            prunedStates += currSize
+        results['cost'] = bssf.cost if foundTour else math.inf
+        results['time'] = end_time - start_time
+        results['count'] = count
+        results['soln'] = bssf
+        results['max'] = maxQueueSize
+        results['total'] = totalStates
+        results['pruned'] = prunedStates
+        return results
+
+    # Method to calculate the heuristic for the generated node
+    # Heuristic is based off of the bound, tree depth, and how much time is left
+    def calcPriority(self, state, startTime, timeAllowance):
+        DEPTH_CONST = 100
+        priority = state.getBound()
+        if (time.time()-startTime) < (timeAllowance/2):
+            priority -= DEPTH_CONST * state.getDepth()
+        else:
+            priority -= DEPTH_CONST * state.getDepth() * state.getDepth()
+        return priority
+
+    # Checks if the tour constitutes a valid tour or not. If it does, the solution is returned, else nothing is returned
+    def checkSolution(self, state, numCities):
+        solution = None
+        route = state.getRoute()
+        if len(route) >= numCities:
+            solution = TSPSolution(route)
+            if solution.cost >= math.inf:
+                solution = None
+        return solution
 
     ''' <summary>
 		This is the entry point for the algorithm you'll write for your group project.
