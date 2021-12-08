@@ -309,18 +309,41 @@ class TSPSolver:
         else:
             return bs
 
+    '''<summary>
+		This function creates an iterable object that reports the various options of how a tour
+        can be split. Since it is a generator function, it only calculates the next value in the
+        "list" when it is requested.
+		</summary>
+
+		<returns>
+        Iterable object that contains tuples of indices to split a tour for the kopt function.
+        </returns> 
+    '''
+
+    ## Time Complexity: Worst case O(n^k)
+    # Time complexity depends on whether every value is iterated over or not since each value
+    # to be iterated over is only calculated when it is needed. So if a kopt is terminated early
+    # from finding a better solution, this function also does not completely execute. If every
+    # value is iterated over, there will be k loops of approximately length n, where n is the
+    # number of cities and k is the number of splits
+    ## Space Complexity: O(k)
+    # Because this is a generator that yields values when iterated over, only one permutation
+    # will exist in memory at a time, leaving a space complexity of k
     def genSplitVals(self, tourLen, numSplits):
+
+        # Empty list to store the split permutation
         group = []
 
+        # Helper recursive function to find the next split to make in the tour
         def generate_partitions(prevIndex, layerNum):
             for index in range(prevIndex+1, tourLen-(numSplits-layerNum)):
                 if layerNum >= numSplits:
-                    # base case
+                    # Base Case: Last split to be made for the given permutation
                     group.append(index)
                     yield tuple(group)
                     group.pop()
                 else:
-                    # continue
+                    # Continue: More splits need to be made
                     group.append(index)
                     yield from generate_partitions(index, layerNum+1)
                     group.pop()
