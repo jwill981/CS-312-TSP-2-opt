@@ -150,23 +150,40 @@ class TSPSolver:
 	'''
 
     def fancy(self, time_allowance=60.0):
-        pass
+        start_time = time.time()
+        cities = self._scenario.getCities()
+        results = {}
+        bssf = self.greedy()['solution']
+        splits = self.genSplitVals(len(cities), 3)
+        for split in splits:
+            new_route = self.k_opt_swap(bssf, split)
+            if new_route.cost < bssf.cost:
+                bssf = new_route
+        end_time = time.time()
+        results['cost'] = bssf.cost
+        results['time'] = end_time - start_time
+        results['count'] = np.inf
+        results['soln'] = bssf
+        results['max'] = np.inf
+        results['total'] = np.inf
+        results['pruned'] = np.inf
+        return results
 
     def k_opt_swap(self, tsp, splits):
         k = len(splits)
-        perm = [x for x in itertools.product([True, False], repeat=k+1)]
+        perm = [x for x in itertools.product([True, False], repeat=k + 1)]
         pieces = []
         cities = tsp.route
         bs = TSPSolution(copy.deepcopy(cities))
-        for i in range(k+1):
+        for i in range(k + 1):
             if i == 0:
                 b = splits[i]
                 pieces.append(cities[:b])
             elif i == k:
-                a = splits[i-1]
+                a = splits[i - 1]
                 pieces.append(cities[a:])
             else:
-                a = splits[i-1]
+                a = splits[i - 1]
                 b = splits[i]
                 pieces.append(cities[a:b])
         for i in range(len(perm)):
