@@ -152,23 +152,21 @@ class TSPSolver:
     def fancy(self, time_allowance=60.0):
         pass
 
-
-
     def k_opt_swap(self, tsp, splits):
         k = len(splits)
-        perm = [x for x in itertools.product([True, False], repeat=k + 1)]
+        perm = [x for x in itertools.product([True, False], repeat=k+1)]
         pieces = []
         cities = tsp.route
         bs = TSPSolution(copy.deepcopy(cities))
-        for i in range(k + 1):
+        for i in range(k+1):
             if i == 0:
                 b = splits[i]
                 pieces.append(cities[:b])
             elif i == k:
-                a = splits[i - 1]
+                a = splits[i-1]
                 pieces.append(cities[a:])
             else:
-                a = splits[i - 1]
+                a = splits[i-1]
                 b = splits[i]
                 pieces.append(cities[a:b])
         for i in range(len(perm)):
