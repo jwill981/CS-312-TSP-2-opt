@@ -267,7 +267,7 @@ class TSPSolver:
         while new_found:
             new_found = False
             splits = self.genSplitVals(ncities, k)
-            print('In ' + str(k) + 'opt at ' + str(60 - (final_time - time.time())))
+            print('In ' + str(k) + 'opt at ' + str(60 - (final_time - time.time())) + ' cost: ' + str(bssf.cost))
             for split in splits:
                 if (time.time() > final_time):
                     break
