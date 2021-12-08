@@ -153,7 +153,7 @@ class TSPSolver:
         start_time = time.time()
         cities = self._scenario.getCities()
         results = {}
-        bssf = self.greedy()['solution']
+        bssf = self.greedy()['soln']
         while time.time()-start_time < time_allowance:
             bssf = self.k_opt(2, len(cities), bssf)
             bssf = self.k_opt(3, len(cities), bssf)
@@ -209,4 +209,19 @@ class TSPSolver:
             return bs
 
     def genSplitVals(self, tourLen, numSplits):
-        return [[]]
+        group = []
+
+        def generate_partitions(prevIndex, layerNum):
+            for index in range(prevIndex+1, tourLen-(numSplits-layerNum)):
+                if layerNum >= numSplits:
+                    # base case
+                    group.append(index)
+                    yield tuple(group)
+                    group.pop()
+                else:
+                    # continue
+                    group.append(index)
+                    yield from generate_partitions(index, layerNum+1)
+                    group.pop()
+
+        return generate_partitions(0, 1)
